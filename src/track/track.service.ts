@@ -1,26 +1,62 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { Tracks } from 'src/data-base';
 
 @Injectable()
 export class TrackService {
   create(createTrackDto: CreateTrackDto) {
-    return 'This action adds a new track';
+    const createTrack = Object.assign(
+      { id: crypto.randomUUID(), albumId: null, artistId: null },
+      createTrackDto,
+    );
+
+    Tracks.push(createTrack);
+
+    console.log(`create new track with id: ${createTrack.id}`);
+
+    return createTrack;
   }
 
   findAll() {
-    return `This action returns all track`;
+    console.log('return all tracks');
+    return Tracks;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} track`;
+  findOne(id: string) {
+    const track = this.findById(id);
+
+    console.log(`find track id: ${track.id}, ${track.name}`);
+
+    return track;
   }
 
-  update(id: number, updateTrackDto: UpdateTrackDto) {
-    return `This action updates a #${id} track`;
+  update(id: string, updateTrackDto: UpdateTrackDto) {
+    const track = this.findById(id);
+    const updatedTrack = Object.assign(track, updateTrackDto);
+
+    console.log(`update track id: ${updatedTrack.id}, ${updatedTrack.name}`);
+
+    return updatedTrack;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} track`;
+  remove(id: string) {
+    const findTrack = this.findById(id);
+    const index = Tracks.findIndex((tack) => tack.id === findTrack.id);
+
+    Tracks.splice(index, 1);
+
+    console.log(`delete track id: ${id}`);
+    return;
+  }
+
+  private findById(id: string) {
+    const findId = Tracks.find((track) => track.id === id);
+    if (!findId)
+      throw new HttpException(
+        `Track with id: ${id} doest exist`,
+        HttpStatus.NOT_FOUND,
+      );
+    return findId;
   }
 }

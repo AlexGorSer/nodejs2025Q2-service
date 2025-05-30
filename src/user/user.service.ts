@@ -7,17 +7,17 @@ import { User } from './type/user';
 @Injectable()
 export class UserService {
   create(createUserDto: CreateUserDto) {
-    const { login, password } = createUserDto;
     const date = Date.now();
 
-    const create: User = {
-      id: crypto.randomUUID(),
-      login: login,
-      password: password,
-      version: 1,
-      createdAt: date,
-      updatedAt: date,
-    };
+    const create: User = Object.assign(
+      {
+        id: crypto.randomUUID(),
+        version: 1,
+        createdAt: date,
+        updatedAt: date,
+      },
+      createUserDto,
+    );
 
     Users.push(create);
     console.log(`User with id: ${create.id} was created`);
@@ -41,6 +41,7 @@ export class UserService {
     if (findUser.password !== updatePasswordDto.oldPassword) {
       throw new HttpException(` oldPassword is wrong`, HttpStatus.FORBIDDEN);
     }
+
     findUser.password = updatePasswordDto.newPassword;
     findUser.updatedAt = Date.now();
     findUser.version = findUser.version + 1;
