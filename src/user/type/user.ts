@@ -3,6 +3,6 @@ export interface User {
   login: string;
   password: string;
   version: number;
-  createAt: number;
-  upgradeAt: number;
+  createdAt: number;
+  updatedAt: number;
 }

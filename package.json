@@ -9,6 +9,7 @@
     "node": ">=22.14.0"
   },
   "scripts": {
+    "test:user": "npm test -- test/users.e2e.spec.ts",
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
