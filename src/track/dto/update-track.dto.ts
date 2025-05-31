@@ -4,6 +4,7 @@ import { IsNotEmpty, IsString, IsOptional, IsInt } from 'class-validator';
 
 export class UpdateTrackDto extends PartialType(CreateTrackDto) {
   @IsNotEmpty()
+  @IsOptional()
   @IsString()
   name: string;
 
@@ -16,6 +17,7 @@ export class UpdateTrackDto extends PartialType(CreateTrackDto) {
   albumId: string | null;
 
   @IsNotEmpty()
+  @IsOptional()
   @IsInt()
   duration: number;
 }
