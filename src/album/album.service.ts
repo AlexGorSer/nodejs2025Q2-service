@@ -1,26 +1,59 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Albums } from 'src/data-base/album-db/albums';
+import { Tracks } from 'src/data-base';
 
 @Injectable()
 export class AlbumService {
   create(createAlbumDto: CreateAlbumDto) {
-    return 'This action adds a new album';
+    const newAlbum = Object.assign({ id: crypto.randomUUID() }, createAlbumDto);
+    Albums.push(newAlbum);
+    console.log('create new album');
+    return newAlbum;
   }
 
   findAll() {
-    return `This action returns all album`;
+    console.log('return album');
+    return Albums;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`;
+  findOne(id: string) {
+    const album = this.findById(id);
+    console.log('find album');
+    return album;
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
-    return `This action updates a #${id} album`;
+  update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const album = this.findById(id);
+    const updateAlbum = Object.assign(album, updateAlbumDto);
+    console.log('update album');
+    return updateAlbum;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} album`;
+  remove(id: string) {
+    const album = this.findById(id);
+    const track = Tracks.find((track) => track.albumId === album.id);
+
+    const indexArtist = Albums.findIndex((data) => data.id === album.id);
+
+    Albums.splice(indexArtist, 1);
+
+    if (track) {
+      // track.artistId = null;
+      Object.assign(track, { albumId: null });
+    }
+    console.log('delete album');
+    return;
+  }
+
+  private findById(id: string) {
+    const findId = Albums.find((artist) => artist.id === id);
+    if (!findId)
+      throw new HttpException(
+        `Album with id: ${id} doest exist`,
+        HttpStatus.NOT_FOUND,
+      );
+    return findId;
   }
 }

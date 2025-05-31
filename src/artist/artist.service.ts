@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { Artists, Tracks } from 'src/data-base';
+import { Albums } from 'src/data-base/album-db/albums';
 
 @Injectable()
 export class ArtistService {
@@ -38,12 +39,17 @@ export class ArtistService {
   remove(id: string) {
     const artist = this.findById(id);
     const track = Tracks.find((track) => track.artistId === artist.id);
+    const album = Albums.find((album) => album.artistId === artist.id);
 
     const indexArtist = Artists.findIndex((data) => data.id === artist.id);
     Artists.splice(indexArtist, 1);
 
     if (track) {
-      track.artistId = null;
+      // track.artistId = null;
+      Object.assign(track, { artistId: null });
+    }
+    if (album) {
+      album.artistId = null;
     }
     console.log('Artist deleted');
     return;
