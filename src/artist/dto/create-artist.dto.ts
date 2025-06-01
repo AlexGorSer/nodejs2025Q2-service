@@ -4,11 +4,11 @@ import { IsBoolean, IsNotEmpty, IsString } from 'class-validator';
 export class CreateArtistDto {
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ example: 'Freddie Mercury', type: 'string' })
   name: string;
 
   @IsNotEmpty()
   @IsBoolean()
-  @ApiProperty()
+  @ApiProperty({ example: true })
   grammy: boolean;
 }

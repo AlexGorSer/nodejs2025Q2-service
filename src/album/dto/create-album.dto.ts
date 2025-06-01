@@ -4,16 +4,20 @@ import { IsNotEmpty, IsString, IsOptional, IsInt } from 'class-validator';
 export class CreateAlbumDto {
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
+  @ApiProperty({ example: 'Innuendo', type: 'string' })
   name: string;
 
   @IsNotEmpty()
   @IsInt()
-  @ApiProperty()
+  @ApiProperty({ type: 'integer' })
   year: number;
 
   @IsString()
   @IsOptional()
-  @ApiProperty({ description: 'string or null', format: 'uuid' })
+  @ApiProperty({
+    format: 'uuid',
+    nullable: true,
+    type: 'string',
+  })
   artistId: string | null;
 }
