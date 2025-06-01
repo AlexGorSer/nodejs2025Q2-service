@@ -8,10 +8,14 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone {https://github.com/AlexGorSer/nodejs2025Q2-service}
 ```
 
 ## Installing NPM modules
+
+```
+git checkout develop
+```
 
 ```
 npm install
@@ -19,13 +23,171 @@ npm install
 
 ## Running application
 
+Create `.env` file and copy all lines from `.env.example`, or rename from `.env.example` to `.env` and save it.
+
+Then start application:
+
 ```
 npm start
+```
+
+for develop
+
+```
+npm run start:dev
 ```
 
 After starting the app on port (4000 as default) you can open
 in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
 For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+## API
+
+To test API use Postman.
+You can import all endpoints from doc api.yaml.
+Documentation for import .yaml into Postman https://learning.postman.com/docs/integrations/available-integrations/working-with-openAPI/
+Also you can test all API from Swagger in http://localhost:4000/doc/.
+Working only API from 'Home Library Service: Part 1'.
+
+## API Routes
+
+- Users (/user route)
+
+  - example data:
+
+    ```typescript
+    interface User {
+      id: string; // uuid v4
+      login: string;
+      password: string;
+      version: number; // integer number, increments on update
+      createdAt: number; // timestamp of creation
+      updatedAt: number; // timestamp of last update
+    }
+    ```
+
+  - `GET /user` - get all users
+
+  - `GET /user/:id` - get single user by id
+
+  - `POST/user` - create user
+
+    - example data:
+
+    ```typescript
+    interface CreateUserDto {
+      login: string;
+      password: string;
+    }
+    ```
+
+  - `PUT /user/:id` - update user's password:
+
+    - example data:
+
+    ```typescript
+    interface UpdatePasswordDto {
+      oldPassword: string; // previous password
+      newPassword: string; // new password
+    }
+    ```
+
+  - `DELETE /user/:id` - delete user
+
+- Tracks (/track route)
+
+  - example data:
+
+  ```typescript
+  interface Track {
+    id: string; // uuid v4
+    name: string;
+    artistId: string | null; // refers to Artist
+    albumId: string | null; // refers to Album
+    duration: number; // integer number
+  }
+  ```
+
+  - `GET /track` - get all tracks
+
+  - `GET /track/:id` - get single track by id
+
+  - `POST /track` - create new track
+
+  - `PUT /track/:id` - update track info
+
+  - `DELETE /track/:id` - delete track
+
+- Artists (/artist route)
+
+  - example data:
+
+  ```typescript
+  interface Artist {
+    id: string; // uuid v4
+    name: string;
+    grammy: boolean;
+  }
+  ```
+
+  - `GET /artist` - get all artists
+
+  - `GET /artist/:id` - get single artist by id
+
+  - `POST /artist` - create new artist
+
+  - `PUT /artist/:id` - update artist info
+
+  - `DELETE /artist/:id` - delete album
+
+- Albums (/album route)
+
+  - example data:
+
+  ```typescript
+  interface Album {
+    id: string; // uuid v4
+    name: string;
+    year: number;
+    artistId: string | null; // refers to Artist
+  }
+  ```
+
+  - `GET /album` - get all albums
+
+  - `GET /album/:id` - get single album by id
+
+  - `POST /album` - create new album
+
+  - `PUT /album/:id` - update album info
+
+  - `DELETE /album/:id` - delete album
+
+- Favorites
+
+  - example data:
+
+  ```typescript
+  interface Favorites {
+    artists: string[]; // favorite artists ids
+    albums: string[]; // favorite albums ids
+    tracks: string[]; // favorite tracks ids
+  }
+  ```
+
+  - `GET /favs` - get all favorites
+
+  - `POST /favs/track/:id` - add track to the favorites
+
+  - `DELETE /favs/track/:id` - delete track from favorites
+
+  - `POST /favs/album/:id` - add album to the favorites
+
+  - `DELETE /favs/album/:id` - delete album from favorites
+
+  - `POST /favs/artist/:id` - add artist to the favorites
+
+  - `DELETE /favs/artist/:id` - delete artist from favorites
 
 ## Testing
 
@@ -41,18 +203,6 @@ To run only one of all test suites
 
 ```
 npm run test -- <path to suite>
-```
-
-To run all test with authorization
-
-```
-npm run test:auth
-```
-
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
 ```
 
 ### Auto-fix and format

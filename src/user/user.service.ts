@@ -25,14 +25,22 @@ export class UserService {
   }
 
   findAll() {
+    const noPassReturn = [];
+    Users.forEach((data) => {
+      const copyUser = Object.assign(data, {});
+      delete copyUser.password;
+      noPassReturn.push(copyUser);
+    });
     console.log(`Return all users`);
-    return Users;
+    return noPassReturn;
   }
 
   findOne(id: string) {
     const findUser = this.findById(id);
     console.log(`Find user with id: ${findUser.id}`);
-    return findUser;
+    const copyUser = Object.assign(findUser, {});
+    delete copyUser.password;
+    return copyUser;
   }
 
   updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
