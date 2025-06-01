@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Tracks } from 'src/data-base';
+import { Favorites, Tracks } from 'src/data-base';
 
 @Injectable()
 export class TrackService {
@@ -43,6 +43,11 @@ export class TrackService {
   remove(id: string) {
     const findTrack = this.findById(id);
     const index = Tracks.findIndex((tack) => tack.id === findTrack.id);
+
+    const favoriteAlbum = Favorites.tracks.findIndex(
+      (track) => track.id === id,
+    );
+    Favorites.tracks.splice(favoriteAlbum, 1);
 
     Tracks.splice(index, 1);
 

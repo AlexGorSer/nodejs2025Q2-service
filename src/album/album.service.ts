@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { Albums } from 'src/data-base/album-db/albums';
-import { Tracks } from 'src/data-base';
+import { Favorites, Tracks } from 'src/data-base';
 
 @Injectable()
 export class AlbumService {
@@ -39,8 +39,12 @@ export class AlbumService {
 
     Albums.splice(indexArtist, 1);
 
+    const favoriteAlbum = Favorites.albums.findIndex(
+      (album) => album.id === id,
+    );
+    Favorites.albums.splice(favoriteAlbum, 1);
+
     if (track) {
-      // track.artistId = null;
       Object.assign(track, { albumId: null });
     }
     console.log('delete album');
