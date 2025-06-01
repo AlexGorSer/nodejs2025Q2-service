@@ -38,29 +38,29 @@ export class ArtistService {
 
   remove(id: string) {
     const artist = this.findById(id);
-    const track = Tracks.find((track) => track.artistId === artist.id);
-    const album = Albums.find((album) => album.artistId === artist.id);
+    const tracks = Tracks.filter((track) => track.artistId === artist.id);
+    const albums = Albums.filter((album) => album.artistId === artist.id);
 
     const indexArtist = Artists.findIndex((data) => data.id === artist.id);
-    Artists.splice(indexArtist, 1);
-
-    const favoriteTrack = Favorites.tracks.find(
-      (artist) => artist.artistId === id,
-    );
     const favoriteArtist = Favorites.artists.findIndex(
       (artist) => artist.id === id,
     );
-    Favorites.artists.splice(favoriteArtist, 1);
+    console.log(favoriteArtist);
+    Artists.splice(indexArtist);
 
-    if (favoriteTrack) {
-      Object.assign(favoriteTrack, { artistId: null });
+    if (favoriteArtist > 0) {
+      Favorites.artists.splice(favoriteArtist);
     }
 
-    if (track) {
-      Object.assign(track, { artistId: null });
+    if (tracks.length) {
+      tracks.forEach((track) => {
+        Object.assign(track, { artistId: null });
+      });
     }
-    if (album) {
-      Object.assign(album, { artistId: null });
+    if (albums.length) {
+      albums.forEach((album) => {
+        Object.assign(album, { artistId: null });
+      });
     }
     console.log('Artist deleted');
     return;

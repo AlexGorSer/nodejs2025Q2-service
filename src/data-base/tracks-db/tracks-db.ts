@@ -9,6 +9,13 @@ export const Tracks: Track[] = [
     duration: 100,
   },
   {
+    id: '1b8677aa-ef73-49cd-b962-a465932b538a',
+    name: 'Grisha eat bananas 2',
+    artistId: 'b611b9c8-c5a7-4c36-8c2c-af00aa7e71a5',
+    albumId: 'd0c0cc35-da26-420d-a561-d7b1b12a16bb',
+    duration: 110,
+  },
+  {
     id: '6474a410-8276-4fa6-a9a9-3e9c784847a9',
     name: 'Dance without pants',
     artistId: '2a415723-7928-4d2a-a28b-34f30f9c2c87',

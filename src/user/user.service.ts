@@ -21,13 +21,17 @@ export class UserService {
 
     Users.push(create);
     console.log(`User with id: ${create.id} was created`);
-    return create;
+    const copy = JSON.parse(JSON.stringify(create));
+    const copyUser = Object.assign(copy, {});
+    delete copyUser.password;
+    return copyUser;
   }
 
   findAll() {
     const noPassReturn = [];
     Users.forEach((data) => {
-      const copyUser = Object.assign(data, {});
+      const copy = JSON.parse(JSON.stringify(data));
+      const copyUser = Object.assign(copy, {});
       delete copyUser.password;
       noPassReturn.push(copyUser);
     });
@@ -38,7 +42,8 @@ export class UserService {
   findOne(id: string) {
     const findUser = this.findById(id);
     console.log(`Find user with id: ${findUser.id}`);
-    const copyUser = Object.assign(findUser, {});
+    const copy = JSON.parse(JSON.stringify(findUser));
+    const copyUser = Object.assign(copy, {});
     delete copyUser.password;
     return copyUser;
   }
@@ -49,14 +54,18 @@ export class UserService {
     if (findUser.password !== updatePasswordDto.oldPassword) {
       throw new HttpException(` oldPassword is wrong`, HttpStatus.FORBIDDEN);
     }
+    const user = Object.assign(findUser, {
+      password: updatePasswordDto.newPassword,
+      updatedAt: Date.now(),
+      version: findUser.version + 1,
+    });
 
-    findUser.password = updatePasswordDto.newPassword;
-    findUser.updatedAt = Date.now();
-    findUser.version = findUser.version + 1;
+    const copy = JSON.parse(JSON.stringify(user));
+    const copyUser = Object.assign(copy, {});
 
     console.log(`Password user id: ${findUser.id} was updated`);
-
-    return findUser;
+    delete copyUser.password;
+    return copyUser;
   }
 
   remove(id: string) {

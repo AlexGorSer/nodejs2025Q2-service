@@ -44,10 +44,13 @@ export class TrackService {
     const findTrack = this.findById(id);
     const index = Tracks.findIndex((tack) => tack.id === findTrack.id);
 
-    const favoriteAlbum = Favorites.tracks.findIndex(
+    const favoriteTrack = Favorites.tracks.findIndex(
       (track) => track.id === id,
     );
-    Favorites.tracks.splice(favoriteAlbum, 1);
+
+    if (favoriteTrack > 0) {
+      Favorites.tracks.splice(favoriteTrack);
+    }
 
     Tracks.splice(index, 1);
 

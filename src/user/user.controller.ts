@@ -19,9 +19,7 @@ export class UserController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    const { login, id, version, createdAt, updatedAt } =
-      this.userService.create(createUserDto);
-    return { login, id, version, createdAt, updatedAt };
+    return this.userService.create(createUserDto);
   }
 
   @Get()
@@ -39,15 +37,7 @@ export class UserController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updatePasswordDto: UpdatePasswordDto,
   ) {
-    const {
-      login,
-      id: test,
-      version,
-      createdAt,
-      updatedAt,
-    } = this.userService.updatePassword(id, updatePasswordDto);
-
-    return { login, test, version, createdAt, updatedAt };
+    return this.userService.updatePassword(id, updatePasswordDto);
   }
 
   @Delete(':id')

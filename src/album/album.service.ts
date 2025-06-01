@@ -33,19 +33,23 @@ export class AlbumService {
 
   remove(id: string) {
     const album = this.findById(id);
-    const track = Tracks.find((track) => track.albumId === album.id);
+    const tracks = Tracks.filter((track) => track.albumId === album.id);
 
-    const indexArtist = Albums.findIndex((data) => data.id === album.id);
-
-    Albums.splice(indexArtist, 1);
-
+    const indexAlbum = Albums.findIndex((data) => data.id === album.id);
     const favoriteAlbum = Favorites.albums.findIndex(
       (album) => album.id === id,
     );
-    Favorites.albums.splice(favoriteAlbum, 1);
 
-    if (track) {
-      Object.assign(track, { albumId: null });
+    Albums.splice(indexAlbum, 1);
+
+    if (favoriteAlbum > 0) {
+      Favorites.albums.splice(favoriteAlbum, 1);
+    }
+
+    if (tracks.length) {
+      tracks.forEach((track) => {
+        Object.assign(track, { albumId: null });
+      });
     }
     console.log('delete album');
     return;
