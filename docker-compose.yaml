@@ -1,0 +1,17 @@
+version: '3.9'
+
+name: home-library
+services:
+  app:
+    container_name: home-library-server
+    build:
+      dockerfile: Dockerfile.server
+    ports:
+      - '${PORT}:${PORT}'
+    env_file: .env
+    restart: always
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app/src
