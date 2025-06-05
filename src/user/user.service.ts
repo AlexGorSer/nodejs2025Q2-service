@@ -1,86 +1,69 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from './entities/user.entity';
+import { Repository } from 'typeorm';
+import { plainToInstance } from 'class-transformer';
 import { UpdatePasswordDto } from './dto/update-user.dto';
-import { Users } from 'src/data-base';
-import { User } from './type/user';
 
 @Injectable()
 export class UserService {
-  create(createUserDto: CreateUserDto) {
-    const date = Date.now();
+  private readonly logger = new Logger(UserService.name, { timestamp: true });
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userEntity: Repository<UserEntity>,
+  ) {}
 
-    const create: User = Object.assign(
-      {
-        id: crypto.randomUUID(),
-        version: 1,
-        createdAt: date,
-        updatedAt: date,
-      },
-      createUserDto,
-    );
+  async create(createUserDto: CreateUserDto) {
+    const user = this.userEntity.create(createUserDto);
 
-    Users.push(create);
-    console.log(`User with id: ${create.id} was created`);
-    const copy = JSON.parse(JSON.stringify(create));
-    const copyUser = Object.assign(copy, {});
-    delete copyUser.password;
-    return copyUser;
+    this.logger.log('Create new user');
+
+    return plainToInstance(UserEntity, await this.userEntity.save(user));
   }
 
-  findAll() {
-    const noPassReturn = [];
-    Users.forEach((data) => {
-      const copy = JSON.parse(JSON.stringify(data));
-      const copyUser = Object.assign(copy, {});
-      delete copyUser.password;
-      noPassReturn.push(copyUser);
-    });
-    console.log(`Return all users`);
-    return noPassReturn;
+  async findAll() {
+    const users = await this.userEntity.find();
+
+    this.logger.log('Find all users');
+
+    return plainToInstance(UserEntity, users);
   }
 
-  findOne(id: string) {
-    const findUser = this.findById(id);
-    console.log(`Find user with id: ${findUser.id}`);
-    const copy = JSON.parse(JSON.stringify(findUser));
-    const copyUser = Object.assign(copy, {});
-    delete copyUser.password;
-    return copyUser;
+  async findOne(id: string) {
+    const findUser = await this.findById(id);
+
+    this.logger.log('Find one users');
+
+    return plainToInstance(UserEntity, findUser);
   }
 
-  updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
-    const findUser = this.findById(id);
+  async updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
+    const findUser = await this.findById(id);
 
     if (findUser.password !== updatePasswordDto.oldPassword) {
       throw new HttpException(` oldPassword is wrong`, HttpStatus.FORBIDDEN);
     }
     const user = Object.assign(findUser, {
       password: updatePasswordDto.newPassword,
-      updatedAt: Date.now(),
-      version: findUser.version + 1,
     });
 
-    const copy = JSON.parse(JSON.stringify(user));
-    const copyUser = Object.assign(copy, {});
+    this.logger.log('update user password');
 
-    console.log(`Password user id: ${findUser.id} was updated`);
-    delete copyUser.password;
-    return copyUser;
+    return plainToInstance(UserEntity, await this.userEntity.save(user));
   }
 
-  remove(id: string) {
-    const findUser = this.findById(id);
-    const index = Users.findIndex((user) => user.id === findUser.id);
+  async remove(id: string) {
+    const user = await this.findById(id);
+    await this.userEntity.remove(user);
 
-    Users.splice(index, 1);
-
-    console.log(`User with id: ${id} deleted`);
+    this.logger.log('remove user');
 
     return;
   }
 
-  private findById(id: string) {
-    const findId = Users.find((user) => user.id === id);
+  private async findById(id: string) {
+    const findId = await this.userEntity.findOne({ where: { id: id } });
     if (!findId)
       throw new HttpException(
         `User with id: ${id} doest exist`,

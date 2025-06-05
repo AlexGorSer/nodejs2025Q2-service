@@ -1,7 +1,21 @@
-version: '3.9'
-
 name: home-library
 services:
+  data-base:
+    container_name: home-library-data-base
+    build:
+      dockerfile: Dockerfile.data-base
+    ports:
+      - '${PORT_DATA_BASE}:5432'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres-data-base:/var/lib/postgresql/data
+    restart: always
+    networks:
+      - home-library
+
   app:
     container_name: home-library-server
     build:
@@ -10,8 +24,19 @@ services:
       - '${PORT}:${PORT}'
     env_file: .env
     restart: always
+    networks:
+      - home-library
+    depends_on:
+      - data-base
     develop:
       watch:
         - action: sync
           path: ./src
           target: /app/src
+
+volumes:
+  postgres-data-base:
+
+networks:
+  home-library:
+    driver: bridge
