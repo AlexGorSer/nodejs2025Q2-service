@@ -9,7 +9,7 @@ import {
 } from 'typeorm';
 
 @Entity({ name: 'tracks' })
-export class Track {
+export class TrackEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -19,7 +19,7 @@ export class Track {
   @Column({ nullable: true })
   @ManyToOne(() => ArtistEntity, (artist) => artist.id, {
     nullable: true,
-    cascade: ['soft-remove', 'recover'],
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'artistId' })
   artistId: string | null;
@@ -27,7 +27,7 @@ export class Track {
   @Column({ nullable: true })
   @ManyToOne(() => AlbumEntity, (album) => album.id, {
     nullable: true,
-    cascade: ['soft-remove', 'recover'],
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'albumId' })
   albumId: string | null;

@@ -21,7 +21,7 @@ export class AlbumEntity {
   @Column({ nullable: true })
   @ManyToOne(() => ArtistEntity, (artist) => artist.id, {
     nullable: true,
-    cascade: ['soft-remove', 'recover'],
+    onDelete: 'SET NULL',
   })
   @JoinColumn({ name: 'artistId' })
   artistId: string | null;

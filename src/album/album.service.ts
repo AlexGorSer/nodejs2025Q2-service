@@ -1,62 +1,60 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { Albums } from 'src/data-base/album-db/albums';
-import { Favorites, Tracks } from 'src/data-base';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { AlbumEntity } from './entities/album.entity';
 
 @Injectable()
 export class AlbumService {
-  create(createAlbumDto: CreateAlbumDto) {
-    const newAlbum = Object.assign({ id: crypto.randomUUID() }, createAlbumDto);
-    Albums.push(newAlbum);
-    console.log('create new album');
-    return newAlbum;
+  private readonly logger = new Logger(AlbumService.name, { timestamp: true });
+  constructor(
+    @InjectRepository(AlbumEntity)
+    private readonly albumEntity: Repository<AlbumEntity>,
+  ) {}
+
+  async create(createAlbumDto: CreateAlbumDto) {
+    const newAlbum = this.albumEntity.create(createAlbumDto);
+
+    this.logger.log('create new album');
+
+    return await this.albumEntity.save(newAlbum);
   }
 
-  findAll() {
-    console.log('return album');
-    return Albums;
+  async findAll() {
+    this.logger.log('return album');
+
+    return await this.albumEntity.find();
   }
 
-  findOne(id: string) {
-    const album = this.findById(id);
-    console.log('find album');
-    return album;
+  async findOne(id: string) {
+    this.logger.log('find album');
+
+    return await this.findById(id);
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto) {
-    const album = this.findById(id);
+  async update(id: string, updateAlbumDto: UpdateAlbumDto) {
+    const album = await this.findById(id);
+
     const updateAlbum = Object.assign(album, updateAlbumDto);
-    console.log('update album');
-    return updateAlbum;
+
+    this.logger.log('update album');
+
+    return await this.albumEntity.save(updateAlbum);
   }
 
-  remove(id: string) {
-    const album = this.findById(id);
-    const tracks = Tracks.filter((track) => track.albumId === album.id);
+  async remove(id: string) {
+    const album = await this.findById(id);
 
-    const indexAlbum = Albums.findIndex((data) => data.id === album.id);
-    const favoriteAlbum = Favorites.albums.findIndex(
-      (album) => album.id === id,
-    );
+    await this.albumEntity.remove(album);
 
-    Albums.splice(indexAlbum, 1);
+    this.logger.log('delete album');
 
-    if (favoriteAlbum > 0) {
-      Favorites.albums.splice(favoriteAlbum, 1);
-    }
-
-    if (tracks.length) {
-      tracks.forEach((track) => {
-        Object.assign(track, { albumId: null });
-      });
-    }
-    console.log('delete album');
     return;
   }
 
-  private findById(id: string) {
-    const findId = Albums.find((artist) => artist.id === id);
+  private async findById(id: string) {
+    const findId = await this.albumEntity.findOne({ where: { id: id } });
     if (!findId)
       throw new HttpException(
         `Album with id: ${id} doest exist`,

@@ -1,65 +1,63 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { Favorites, Tracks } from 'src/data-base';
+import { TrackEntity } from './entities/track.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  create(createTrackDto: CreateTrackDto) {
-    const createTrack = Object.assign(
-      { id: crypto.randomUUID(), albumId: null, artistId: null },
-      createTrackDto,
-    );
+  private readonly logger = new Logger(TrackService.name, { timestamp: true });
+  constructor(
+    @InjectRepository(TrackEntity)
+    private readonly trackEntity: Repository<TrackEntity>,
+  ) {}
 
-    Tracks.push(createTrack);
+  async create(createTrackDto: CreateTrackDto) {
+    const newArtist = this.trackEntity.create(createTrackDto);
 
-    console.log(`create new track with id: ${createTrack.id}`);
+    this.logger.log(`create new track`);
 
-    return createTrack;
+    return await this.trackEntity.save(newArtist);
   }
 
-  findAll() {
-    console.log('return all tracks');
-    return Tracks;
+  async findAll() {
+    this.logger.log('return all tracks');
+
+    return await this.trackEntity.find();
   }
 
-  findOne(id: string) {
-    const track = this.findById(id);
+  async findOne(id: string) {
+    const track = await this.findById(id);
 
-    console.log(`find track id: ${track.id}, ${track.name}`);
+    this.logger.log(`find track id: ${track.id}, ${track.name}`);
 
     return track;
   }
 
-  update(id: string, updateTrackDto: UpdateTrackDto) {
-    const track = this.findById(id);
+  async update(id: string, updateTrackDto: UpdateTrackDto) {
+    const track = await this.findById(id);
+
     const updatedTrack = Object.assign(track, updateTrackDto);
 
-    console.log(`update track id: ${updatedTrack.id}, ${updatedTrack.name}`);
+    this.logger.log(
+      `update track id: ${updatedTrack.id}, ${updatedTrack.name}`,
+    );
 
     return updatedTrack;
   }
 
-  remove(id: string) {
-    const findTrack = this.findById(id);
-    const index = Tracks.findIndex((tack) => tack.id === findTrack.id);
+  async remove(id: string) {
+    const findTrack = await this.findById(id);
 
-    const favoriteTrack = Favorites.tracks.findIndex(
-      (track) => track.id === id,
-    );
+    await this.trackEntity.remove(findTrack);
 
-    if (favoriteTrack > 0) {
-      Favorites.tracks.splice(favoriteTrack);
-    }
-
-    Tracks.splice(index, 1);
-
-    console.log(`delete track id: ${id}`);
+    this.logger.log(`delete track id: ${id}`);
     return;
   }
 
-  private findById(id: string) {
-    const findId = Tracks.find((track) => track.id === id);
+  private async findById(id: string) {
+    const findId = await this.trackEntity.findOne({ where: { id: id } });
     if (!findId)
       throw new HttpException(
         `Track with id: ${id} doest exist`,
