@@ -23,7 +23,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "docker:dev": "docker-compose -f docker-compose.yaml up --build --watch"
+    "docker:dev": "docker-compose -f docker-compose.yaml up --build --watch",
+    "docker:prod": "docker-compose -f docker-compose-prod.yaml up --build --watch",
+    "docker:scout": "docker scout quickview"
   },
   "dependencies": {
     "@nestjs/common": "^10.4.16",
