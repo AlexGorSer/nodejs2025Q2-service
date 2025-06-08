@@ -1,100 +1,175 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Favorites, Tracks, Artists } from 'src/data-base';
-import { Albums } from 'src/data-base/album-db/albums';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Messages } from 'src/helpers/enum.helpers';
+import { Repository } from 'typeorm';
+import { FavoritesEntity } from './entities/favorites.entity';
+import { ArtistEntity } from 'src/artist/entities/artist.entity';
+import { plainToInstance } from 'class-transformer';
+import { AlbumEntity } from 'src/album/entities/album.entity';
+import { TrackEntity } from 'src/track/entities/track.entity';
 
 @Injectable()
 export class FavoritesService {
-  findAll() {
-    return Favorites;
-  }
+  private favoriteID = '1';
 
-  addTrack(id: string) {
-    const track = this.findById(
-      id,
-      Tracks,
-      'id',
-      Messages.TRACK_NO_EXIST,
-      HttpStatus.UNPROCESSABLE_ENTITY,
-    );
-    Favorites.tracks.push(track);
-    return track;
-  }
-  addAlbum(id: string) {
-    const album = this.findById(
-      id,
-      Albums,
-      'id',
-      Messages.ALBUM_NO_EXIST,
-      HttpStatus.UNPROCESSABLE_ENTITY,
-    );
-    Favorites.albums.push(album);
-    return album;
-  }
-  addArtist(id: string) {
-    const artist = this.findById(
-      id,
-      Artists,
-      'id',
-      Messages.ARTIST_NO_EXIST,
-      HttpStatus.UNPROCESSABLE_ENTITY,
-    );
-    Favorites.artists.push(artist);
-    return artist;
-  }
-
-  removeTrack(id: string) {
-    const track = this.findById(
-      id,
-      Favorites.tracks,
-      'id',
-      Messages.TRACK_NO_FAVORITE,
-      HttpStatus.NOT_FOUND,
-    );
-    const index = Favorites.tracks.findIndex((data) => data.id === track.id);
-
-    Favorites.tracks.splice(index, 1);
-    return track;
-  }
-
-  removeAlbum(id: string) {
-    const album = this.findById(
-      id,
-      Favorites.albums,
-      'id',
-      Messages.ALBUM_NO_FAVORITE,
-      HttpStatus.NOT_FOUND,
-    );
-    const index = Favorites.albums.findIndex((data) => data.id === album.id);
-
-    Favorites.albums.splice(index, 1);
-
-    return album;
-  }
-
-  removeArtist(id: string) {
-    const artist = this.findById(
-      id,
-      Favorites.artists,
-      'id',
-      Messages.ARTIST_NO_FAVORITE,
-      HttpStatus.NOT_FOUND,
-    );
-    const index = Favorites.artists.findIndex((data) => data.id === artist.id);
-
-    Favorites.artists.splice(index, 1);
-    return artist;
-  }
-
-  private findById<T>(
-    id: string,
-    arr: T[],
-    key: string,
-    message: string,
-    code: number,
+  constructor(
+    @InjectRepository(FavoritesEntity)
+    private readonly favoritesEntity: Repository<FavoritesEntity>,
+    @InjectRepository(ArtistEntity)
+    private readonly artistEntity: Repository<ArtistEntity>,
+    @InjectRepository(AlbumEntity)
+    private readonly albumEntity: Repository<AlbumEntity>,
+    @InjectRepository(TrackEntity)
+    private readonly trackEntity: Repository<TrackEntity>,
   ) {
-    const findId = arr.find((data) => data[key] === id);
-    if (!findId) throw new HttpException(`${message}`, code);
-    return findId;
+    this.createAfterLaunch();
+  }
+
+  async findAll() {
+    const test = await this.favoritesEntity.find({
+      relations: ['artists', 'tracks', 'albums'],
+    });
+
+    return plainToInstance(FavoritesEntity, test[0]);
+  }
+
+  async addTrack(id: string) {
+    const findId = await this.trackEntity.findOne({ where: { id: id } });
+
+    if (!findId) {
+      throw new HttpException(
+        `User with id: ${Messages.TRACK_NO_EXIST} doest exist`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const fav = await this.favoritesEntity.findOne({
+      where: { id: this.favoriteID },
+      relations: ['tracks'],
+    });
+
+    fav.tracks.push(findId);
+    return await this.favoritesEntity.save(fav);
+  }
+
+  async addAlbum(id: string) {
+    const findId = await this.albumEntity.findOne({ where: { id: id } });
+
+    if (!findId) {
+      throw new HttpException(
+        `User with id: ${Messages.ALBUM_NO_EXIST} doest exist`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const fav = await this.favoritesEntity.findOne({
+      where: { id: this.favoriteID },
+      relations: ['albums'],
+    });
+
+    fav.albums.push(findId);
+    return await this.favoritesEntity.save(fav);
+  }
+
+  async addArtist(id: string) {
+    const findId = await this.artistEntity.findOne({ where: { id: id } });
+
+    if (!findId) {
+      throw new HttpException(
+        `${Messages.ARTIST_NO_EXIST}`,
+        HttpStatus.UNPROCESSABLE_ENTITY,
+      );
+    }
+
+    const fav = await this.favoritesEntity.findOne({
+      where: { id: this.favoriteID },
+      relations: ['artists'],
+    });
+
+    fav.artists.push(findId);
+    return await this.favoritesEntity.save(fav);
+  }
+
+  async removeTrack(id: string) {
+    const findId = await this.favoritesEntity.findOne({
+      where: {
+        id: this.favoriteID,
+      },
+      relations: ['tracks'],
+    });
+    const find = findId.tracks.find((track) => track.id === id);
+    if (!find) {
+      throw new HttpException(
+        `${Messages.TRACK_NO_FAVORITE}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    findId.tracks = findId.tracks.filter((track) => track.id !== id);
+
+    await this.favoritesEntity.save(findId);
+
+    return;
+  }
+
+  async removeAlbum(id: string) {
+    const findId = await this.favoritesEntity.findOne({
+      where: {
+        id: this.favoriteID,
+      },
+      relations: ['albums'],
+    });
+    const find = findId.albums.find((album) => album.id === id);
+    if (!find) {
+      throw new HttpException(
+        `${Messages.ALBUM_NO_FAVORITE}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    findId.albums = findId.albums.filter((album) => album.id !== id);
+
+    await this.favoritesEntity.save(findId);
+
+    return;
+  }
+
+  async removeArtist(id: string) {
+    const findId = await this.favoritesEntity.findOne({
+      where: {
+        id: this.favoriteID,
+      },
+      relations: ['artists'],
+    });
+    const find = findId.artists.find((artist) => artist.id === id);
+    if (!find) {
+      throw new HttpException(
+        `${Messages.ARTIST_NO_FAVORITE}`,
+        HttpStatus.NOT_FOUND,
+      );
+    }
+
+    findId.artists = findId.artists.filter((artist) => artist.id !== id);
+
+    await this.favoritesEntity.save(findId);
+
+    return;
+  }
+
+  private async createAfterLaunch() {
+    const fav = await this.favoritesEntity.findOne({
+      where: { id: this.favoriteID },
+      relations: ['artists', 'albums', 'tracks'],
+    });
+
+    if (!fav) {
+      await this.favoritesEntity.save({
+        id: '1',
+        artists: [],
+        albums: [],
+        tracks: [],
+      });
+    }
+    return;
   }
 }
