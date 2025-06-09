@@ -2,8 +2,7 @@ name: home-library
 services:
   data-base:
     container_name: home-library-data-base
-    build:
-      dockerfile: Dockerfile.data-base
+    image: postgres:17.5-alpine3.22
     ports:
       - '${PORT_DATA_BASE}:${PORT_DATA_BASE}'
     environment:
@@ -21,9 +20,8 @@ services:
         'log_statement=all',
       ]
     volumes:
-      - postgres-data-base-dev:/var/lib/postgresql/data
+      - postgres-data-base-img:/var/lib/postgresql/data
       - postgres-logs:/var/lib/postgresql/logs
-
     restart: on-failure
     networks:
       - home-library
@@ -36,31 +34,24 @@ services:
       interval: 10s
       retries: 5
       start_period: 30s
-      timeout: 10s
+      timeout: 15s
 
   app:
     container_name: home-library-server
-    build:
-      dockerfile: Dockerfile.server
+    image: alexgorser/home-library-app:latest
     ports:
       - '${PORT}:${PORT}'
     env_file: .env
-
+    restart: on-failure
+    networks:
+      - home-library
+    command: 'npm run start:prod'
     depends_on:
       data-base:
         condition: service_healthy
-    networks:
-      - home-library
-    restart: on-failure
-    command: 'npm run start:dev'
-    develop:
-      watch:
-        - action: sync
-          path: ./src
-          target: /app/src
 
 volumes:
-  postgres-data-base-dev:
+  postgres-data-base-img:
   postgres-logs:
 
 networks:

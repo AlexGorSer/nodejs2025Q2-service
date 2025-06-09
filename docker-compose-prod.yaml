@@ -21,7 +21,7 @@ services:
         'log_statement=all',
       ]
     volumes:
-      - postgres-data-bases:/var/lib/postgresql/data
+      - postgres-data-base-prod:/var/lib/postgresql/data
       - postgres-logs:/var/lib/postgresql/logs
     restart: on-failure
     networks:
@@ -53,7 +53,7 @@ services:
         condition: service_healthy
 
 volumes:
-  postgres-data-bases:
+  postgres-data-base-prod:
   postgres-logs:
 
 networks:

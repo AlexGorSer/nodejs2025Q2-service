@@ -23,6 +23,8 @@ npm install
 
 ## Docker run
 
+remove db volumes from other students make sure they are not there to avoid conflicts between migrations
+
 Create `.env` file and copy all lines from `.env.example`, or rename from `.env.example` to `.env` and save it.
 
 For develop in docker container:
@@ -38,6 +40,12 @@ for product version:
 
 ```
 docker:prod
+```
+
+for pull from docker-hub images
+
+```
+docker:img
 ```
 
 check script for vulnerabilities scanning
