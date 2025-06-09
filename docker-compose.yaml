@@ -24,9 +24,19 @@ services:
       - postgres-data-base:/var/lib/postgresql/data
       - postgres-logs:/var/lib/postgresql/logs
 
-    restart: always
+    restart: on-failure
     networks:
       - home-library
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-user} -d ${POSTGRES_DB:-db}',
+        ]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
   app:
     container_name: home-library-server
@@ -35,11 +45,14 @@ services:
     ports:
       - '${PORT}:${PORT}'
     env_file: .env
-    restart: always
+
+    depends_on:
+      data-base:
+        condition: service_healthy
     networks:
       - home-library
-    depends_on:
-      - data-base
+    restart: on-failure
+    command: 'npm run start:dev'
     develop:
       watch:
         - action: sync

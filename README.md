@@ -14,11 +14,60 @@ git clone {https://github.com/AlexGorSer/nodejs2025Q2-service}
 ## Installing NPM modules
 
 ```
-git checkout develop
+git checkout develop-part-2
 ```
 
 ```
 npm install
+```
+
+## Docker run
+
+Create `.env` file and copy all lines from `.env.example`, or rename from `.env.example` to `.env` and save it.
+
+For develop in docker container:
+Creates a development version with its own commands and launch methods, in the line Docker commands description of all commands
+
+After the application starts, migrations are loaded automatically from `typeorm/migrations/`
+
+```
+docker:dev
+```
+
+for product version:
+
+```
+docker:prod
+```
+
+check script for vulnerabilities scanning
+
+```
+docker:scout
+```
+
+## Docker commands (only dev)
+
+Docker commands: WARNING do not use docker commands in the prod version of docker, they are made for dev version
+
+these commands were run inside docker and show logs in the local console
+
+generate a new migration
+
+```
+docker:mig:gen
+```
+
+run migration
+
+```
+docker:mig:run
+```
+
+revert migration
+
+```
+docker:mig:revert
 ```
 
 ## Running application
