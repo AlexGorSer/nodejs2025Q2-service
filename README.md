@@ -58,6 +58,21 @@ docker:scout
 
 Docker commands: WARNING do not use docker commands in the prod version of docker, they are made for dev version
 
+if you want to try these commands: before creating the container, in the folder typeorm/datasource.ts put migrationsRun: false,
+and run:
+
+```
+docker:dev
+```
+
+then
+
+```
+docker:mig:run
+```
+
+then restart nest.js app
+
 these commands were run inside docker and show logs in the local console
 
 generate a new migration

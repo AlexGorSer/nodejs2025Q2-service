@@ -1,9 +1,4 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { AlbumEntity } from '../album/entities/album.entity';
-import { ArtistEntity } from '../artist/entities/artist.entity';
-import { FavoritesEntity } from '../favorites/entities/favorites.entity';
-import { TrackEntity } from '../track/entities/track.entity';
-import { UserEntity } from '../user/entities/user.entity';
 
 export const config: DataSourceOptions = {
   type: 'postgres',
@@ -13,14 +8,8 @@ export const config: DataSourceOptions = {
   password: process.env.POSTGRES_PASSWORD || '12345',
   database: process.env.POSTGRES_DB || 'home-library-db',
   synchronize: false,
-  entities: [
-    UserEntity,
-    TrackEntity,
-    AlbumEntity,
-    ArtistEntity,
-    FavoritesEntity,
-  ],
-  migrations: ['dist/typeorm/migrations/*.js'],
+  entities: ['dist/**/*.entity{.ts,.js}'],
+  migrations: ['dist/typeorm/migrations/*{.ts,.js}'],
   migrationsRun: true,
 };
 
