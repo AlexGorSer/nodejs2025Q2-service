@@ -54,6 +54,14 @@ check script for vulnerabilities scanning
 docker:scout
 ```
 
+for check logs in log task in `.env` file change from POSTGRES_HOST=home-library-data-base to POSTGRES_HOST=localhost
+it start dev local version app with pg docker container.
+all logs store in `logs` folder
+
+```
+docker:local
+```
+
 ## Docker commands (only dev)
 
 Docker commands: WARNING do not use docker commands in the prod version of docker, they are made for dev version

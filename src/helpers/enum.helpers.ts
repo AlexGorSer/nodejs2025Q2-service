@@ -6,3 +6,9 @@ export enum Messages {
   ALBUM_NO_FAVORITE = 'Album is not favorite',
   ARTIST_NO_FAVORITE = 'Artist is not favorite',
 }
+
+export enum LogLevel {
+  LOG = 'log',
+  ERROR = 'error',
+  WARN = 'warn',
+}

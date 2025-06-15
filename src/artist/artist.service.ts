@@ -47,30 +47,6 @@ export class ArtistService {
 
     await this.artistEntity.remove(artist);
 
-    // const tracks = Tracks.filter((track) => track.artistId === artist.id);
-    // const albums = Albums.filter((album) => album.artistId === artist.id);
-
-    // const indexArtist = Artists.findIndex((data) => data.id === artist.id);
-    // const favoriteArtist = Favorites.artists.findIndex(
-    //   (artist) => artist.id === id,
-    // );
-    // console.log(favoriteArtist);
-    // Artists.splice(indexArtist);
-
-    // if (favoriteArtist > 0) {
-    //   Favorites.artists.splice(favoriteArtist);
-    // }
-
-    // if (tracks.length) {
-    //   tracks.forEach((track) => {
-    //     Object.assign(track, { artistId: null });
-    //   });
-    // }
-    // if (albums.length) {
-    //   albums.forEach((album) => {
-    //     Object.assign(album, { artistId: null });
-    //   });
-    // }
     this.logger.log('Artist deleted');
 
     return;

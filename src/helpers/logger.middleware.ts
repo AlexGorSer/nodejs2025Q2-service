@@ -7,10 +7,10 @@ import { LoggingService } from './logger.service';
 export class LoggerMiddleware implements NestMiddleware {
   constructor(private readonly loggingService: LoggingService) {}
   use(req: Request, res: Response, next: NextFunction) {
-    const { originalUrl, query, body } = req;
+    const { method, originalUrl, query, body } = req;
     const logTime = new Date().toLocaleString();
 
-    const messageToLog = `Time: ${logTime}, Url: ${JSON.stringify(originalUrl)} Query: ${JSON.stringify(query)} Body: ${JSON.stringify(body)}, Status: ${res.statusCode}`;
+    const messageToLog = `[${method}] Time: ${logTime}, Url: ${JSON.stringify(originalUrl)} Query: ${JSON.stringify(query)} Body: ${JSON.stringify(body)}, Status: ${res.statusCode}`;
 
     this.loggingService.log(messageToLog);
     next();

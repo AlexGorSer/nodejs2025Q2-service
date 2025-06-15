@@ -10,4 +10,3 @@ import { AlbumEntity } from './entities/album.entity';
   providers: [AlbumService],
 })
 export class AlbumModule {}
-//
