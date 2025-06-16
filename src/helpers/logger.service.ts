@@ -12,7 +12,14 @@ export class LoggingService implements LoggerService {
   }
 
   private readonly consoleLogger = new ConsoleLogger();
-  private readonly logsLevelDef: object = { log: 0, error: 1, warn: 2 };
+  private readonly logsLevelDef: object = {
+    log: 0,
+    error: 1,
+    warn: 2,
+    debug: 3,
+    verbose: 4,
+    fatal: 5,
+  };
 
   private readonly logLevel: number | string = process.env.LOG_LEVEL || 2;
   private readonly MAX_SIZE: number | string = process.env.MAX_LOG_SIZE || 200;
@@ -23,11 +30,15 @@ export class LoggingService implements LoggerService {
   private errorLogStream: fs.WriteStream;
   private appLogStream: fs.WriteStream;
 
-  log(message: string) {
+  log(message: string, context = '') {
     if (this.logLevelCheck(LogLevel.LOG)) {
       try {
-        this.consoleLogger.log(`[${LogLevel.LOG.toUpperCase()}]: ${message}`);
-        this.writeAppLogsToFile(`[${LogLevel.LOG.toUpperCase()}]: ${message}`);
+        this.consoleLogger.log(
+          `[${LogLevel.LOG.toUpperCase()}]:[${context}] ${message}`,
+        );
+        this.writeAppLogsToFile(
+          `[${LogLevel.LOG.toUpperCase()}]:[${context}] ${message}`,
+        );
       } catch {
         this.appLogStream.end();
         this.errorLogStream.end();
@@ -36,14 +47,14 @@ export class LoggingService implements LoggerService {
     }
   }
 
-  error(message: string) {
+  error(message: string, context = '', trace?: string) {
     if (this.logLevelCheck(LogLevel.ERROR)) {
       try {
         this.writeErrorLogsToFile(
-          `[${LogLevel.ERROR.toUpperCase()}]: ${message}`,
+          `[${LogLevel.ERROR.toUpperCase()}]:[${context}] ${trace}, ${message}`,
         );
         this.consoleLogger.error(
-          `[${LogLevel.ERROR.toUpperCase()}]: ${message}`,
+          `[${LogLevel.ERROR.toUpperCase()}]:[${context}] ${trace}, ${message}`,
         );
       } catch {
         this.appLogStream.end();
@@ -52,11 +63,67 @@ export class LoggingService implements LoggerService {
       }
     }
   }
-  warn(message: string) {
+
+  warn(message: string, context = '') {
     if (this.logLevelCheck(LogLevel.WARN)) {
       try {
-        this.writeAppLogsToFile(`[${LogLevel.WARN.toUpperCase()}]: ${message}`);
-        this.consoleLogger.warn(`[${LogLevel.WARN.toUpperCase()}]: ${message}`);
+        this.writeAppLogsToFile(
+          `[${LogLevel.WARN.toUpperCase()}]:[${context}] ${message}`,
+        );
+        this.consoleLogger.warn(
+          `[${LogLevel.WARN.toUpperCase()}]:[${context}] ${message}`,
+        );
+      } catch {
+        this.appLogStream.end();
+        this.errorLogStream.end();
+        this.createStreamsAfterStart();
+      }
+    }
+  }
+
+  debug?(message: string, context = '') {
+    if (this.logLevelCheck(LogLevel.DEBUG)) {
+      try {
+        this.writeAppLogsToFile(
+          `[${LogLevel.DEBUG.toUpperCase()}]:[${context}] ${message}`,
+        );
+        this.consoleLogger.debug(
+          `[${LogLevel.DEBUG.toUpperCase()}]:[${context}] ${message}`,
+        );
+      } catch {
+        this.appLogStream.end();
+        this.errorLogStream.end();
+        this.createStreamsAfterStart();
+      }
+    }
+  }
+
+  verbose?(message: string, context = '') {
+    if (this.logLevelCheck(LogLevel.VERBOSE)) {
+      try {
+        this.writeAppLogsToFile(
+          `[${LogLevel.VERBOSE.toUpperCase()}]:[${context}] ${message}`,
+        );
+        this.consoleLogger.verbose(
+          `[${LogLevel.VERBOSE.toUpperCase()}]:[${context}] ${message}`,
+        );
+      } catch {
+        this.appLogStream.end();
+        this.errorLogStream.end();
+        this.createStreamsAfterStart();
+      }
+    }
+  }
+
+  fatal?(message: string, context = '') {
+    if (this.logLevelCheck(LogLevel.FATAL)) {
+      try {
+        this.writeErrorLogsToFile(
+          `[${LogLevel.FATAL.toUpperCase()}]:[${context}] ${message}`,
+        );
+        this.consoleLogger.fatal(
+          `[${LogLevel.FATAL.toUpperCase()}]:[${context}] ${message}`,
+        );
       } catch {
         this.appLogStream.end();
         this.errorLogStream.end();
