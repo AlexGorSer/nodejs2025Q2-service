@@ -5,9 +5,12 @@ import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 import { UpdatePasswordDto } from './dto/update-user.dto';
+import 'dotenv/config';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
+  private readonly salt = +process.env.CRYPT_SALT || 10;
   private readonly logger = new Logger(UserService.name, { timestamp: true });
   constructor(
     @InjectRepository(UserEntity)
@@ -15,7 +18,14 @@ export class UserService {
   ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.userEntity.create(createUserDto);
+    const { login, password } = createUserDto;
+
+    const salts = await bcrypt.genSalt(this.salt);
+
+    const user = this.userEntity.create({
+      login: login,
+      password: await bcrypt.hash(password, salts),
+    });
 
     this.logger.log('Create new user');
 
@@ -41,11 +51,18 @@ export class UserService {
   async updatePassword(id: string, updatePasswordDto: UpdatePasswordDto) {
     const findUser = await this.findById(id);
 
-    if (findUser.password !== updatePasswordDto.oldPassword) {
+    const validPassword = await bcrypt.compare(
+      updatePasswordDto.oldPassword,
+      findUser.password,
+    );
+
+    if (!validPassword) {
       throw new HttpException(` oldPassword is wrong`, HttpStatus.FORBIDDEN);
     }
+
+    const salts = await bcrypt.genSalt(this.salt);
     const user = Object.assign(findUser, {
-      password: updatePasswordDto.newPassword,
+      password: await bcrypt.hash(updatePasswordDto.newPassword, salts),
     });
 
     this.logger.log('update user password');

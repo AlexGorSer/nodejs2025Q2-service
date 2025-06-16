@@ -1,8 +1,8 @@
 import { ConsoleLogger, Injectable, LoggerService } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
-import 'dotenv/config';
 import { LogLevel } from './enum.helpers';
+import 'dotenv/config';
 
 @Injectable()
 export class LoggingService implements LoggerService {
@@ -14,8 +14,8 @@ export class LoggingService implements LoggerService {
   private readonly consoleLogger = new ConsoleLogger();
   private readonly logsLevelDef: object = { log: 0, error: 1, warn: 2 };
 
-  private readonly logLevel: number = +process.env.LOG_LEVEL || 2;
-  private readonly MAX_SIZE: number = +process.env.MAX_LOG_SIZE || 200;
+  private readonly logLevel: number | string = process.env.LOG_LEVEL || 2;
+  private readonly MAX_SIZE: number | string = process.env.MAX_LOG_SIZE || 200;
 
   private pathToLogs = path.resolve(process.cwd(), 'logs');
   private currentAppNameFile: string = Date.now().toString();
@@ -72,7 +72,7 @@ export class LoggingService implements LoggerService {
       path.join(this.pathToLogs, `${this.currentAppNameFile}.app.log`),
     );
 
-    if (size / 1024 > this.MAX_SIZE) {
+    if (size / 1024 > +this.MAX_SIZE) {
       this.currentAppNameFile = Date.now().toString();
 
       this.appLogStream.end();
@@ -93,7 +93,7 @@ export class LoggingService implements LoggerService {
       path.join(this.pathToLogs, `${this.currentErrNameFiles}.err.log`),
     );
 
-    if (size / 1024 > this.MAX_SIZE) {
+    if (size / 1024 > +this.MAX_SIZE) {
       this.currentErrNameFiles = Date.now().toString();
 
       this.errorLogStream.end();
@@ -130,6 +130,6 @@ export class LoggingService implements LoggerService {
 
   private logLevelCheck(level: string) {
     const lvlNumber = this.logsLevelDef[level];
-    return lvlNumber <= this.logLevel;
+    return +lvlNumber <= +this.logLevel;
   }
 }

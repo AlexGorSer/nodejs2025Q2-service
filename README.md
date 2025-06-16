@@ -14,7 +14,7 @@ git clone {https://github.com/AlexGorSer/nodejs2025Q2-service}
 ## Installing NPM modules
 
 ```
-git checkout develop-part-2
+git checkout develop-part-3
 ```
 
 ```
@@ -54,12 +54,18 @@ check script for vulnerabilities scanning
 docker:scout
 ```
 
-for check logs in log task in `.env` file change from POSTGRES_HOST=home-library-data-base to POSTGRES_HOST=localhost
+For check logs in log task in `.env` file change from POSTGRES_HOST=home-library-data-base to POSTGRES_HOST=localhost
 it start dev local version app with pg docker container.
 all logs store in `logs` folder
 
 ```
 docker:local
+```
+
+then run in another command sell
+
+```
+npm run start:dev
 ```
 
 ## Docker commands (only dev)
@@ -272,11 +278,16 @@ Working only API from 'Home Library Service: Part 1'.
 ## Testing
 
 After application running open new terminal and enter:
-
-To run all tests without authorization
+in part 3 `npm run test` don't work,
 
 ```
-npm run test
+npm run test:auth
+```
+
+For refresh test
+
+```
+npm run test:refresh
 ```
 
 To run only one of all test suites
